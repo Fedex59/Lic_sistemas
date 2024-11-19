@@ -12,3 +12,4 @@ int main(int argc, char const *argv[])
 	Dia = (Fecha/100)%100;
 	cout <<"La fecha es: " << Dia <<"/"<< Mes <<"/"<< Anio ;
 	return 0;
+}
