@@ -4,12 +4,15 @@ using namespace std;
 
 int main(int argc, char const *argv[]) 
 {
-	int Edad; 
-	float Puls;
-	cout<< "Ingrese la edad de la persona ";
-	cin>>Edad;
-	Puls=(220-Edad)/10;
-	cout <<"El num de pulsaciones cada 10 seg son: " << Puls;
+	int Venta, Porc; 
+	float Costo;
+	cout<< "Ingrese el valor del producto ";
+	cin>>Venta;
+    cout<< "Ingrese el porcentaje de ganancia ";
+	cin>>Porc;
+	Costo = Venta/1+(Porc/100.0);
+
+	cout <<"El costo es de: " << Costo;
 	
 	
 	return 0;
