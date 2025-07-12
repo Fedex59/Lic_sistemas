@@ -13,7 +13,7 @@ int main(int argc, char const *argv[])
 		}
 	}
 	
-	cout << "Los la fila a mostrar: ";
+	cout << "Ingrese la fila a mostrar: ";
 		cin>>n;
 		
 	cout << "Los numeros la fila son:";
