@@ -15,14 +15,15 @@ int main(int argc, char const *argv[])
         cout << "Ingrese la deuda que posee ";
 		cin >> lista[i][1];
 	}
+	cout<<"Ingrese el cliente a buscar ";
+	cin>>dat;
 
 	i=0;
-
 	while (i < n)
 	{
-		if (lista[i] [0]== dat)
+		if (lista[i][0] == dat)
 		{ band=1;
-		pos=i+1;
+		pos=i;
 		i=n;
 		}
 		i++;
@@ -30,14 +31,12 @@ int main(int argc, char const *argv[])
 	
 	
 	if (band == 0)
-		cout<<"El dni no fue hallado";
+		cout<<"Cliente Inexistente";
 	
 	else 
 	{
-		prom = notas[pos][0]+notas[pos][1]+notas[pos][2];
-			prom = prom/3;
 			
-			cout<<"El promedio de alumno " << dni[pos]<<"Es: " <<pos;
+			cout<<"El cliente " << lista[pos][0]<<" tiene una deuda de : " <<lista[pos][1];
 	}
 		return 0;
 }
