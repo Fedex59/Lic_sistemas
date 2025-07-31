@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
 	int Vec[100]
 	
 	//Cant = cantidad de elementos del vector
+	//solo las funciones, faltan los cout y demas ingresos de datos....
 
 	resultado = Hipot(a, b);
 
