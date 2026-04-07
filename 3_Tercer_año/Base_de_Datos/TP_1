@@ -1,0 +1,254 @@
+
+//estructuras necesarias
+
+Registro:
+    clave: int
+    dato: string
+    dir: int   // -1 si no apunta a overflow
+
+Indice:
+    clave: int
+    dir: int
+
+//pseudocodigo
+Funcion CONSULTAR(claveBuscada):
+
+    // 1. Buscar bloque en índice
+    para i desde 0 hasta cantIndices-1:
+        si claveBuscada >= indice[i].clave Y 
+           (i es el último OR claveBuscada < indice[i+1].clave):
+            bloqueInicio = indice[i].dir
+            salir
+
+    // 2. Recorrer bloque
+    para j desde 0 hasta n-1:
+        pos = bloqueInicio + j
+        
+        si datos[pos].clave == claveBuscada:
+            devolver datos[pos]
+
+        // 3. Revisar overflow
+        aux = datos[pos].dir
+        mientras aux != -1:
+            si datos[aux].clave == claveBuscada:
+                devolver datos[aux]
+            aux = datos[aux].dir
+
+    devolver "NO ENCONTRADO"
+
+Funcion INSERTAR(clave, dato):
+
+    // 1. Buscar bloque
+    encontrar bloqueInicio usando índice
+
+    // 2. Contar elementos en bloque
+    cant = contar registros con clave != 0
+
+    // 3. Buscar posición de inserción
+    posInsercion = posición ordenada dentro del bloque
+
+    // CASO A: Hay espacio
+    si cant < n:
+        desplazar registros a derecha
+        insertar en posInsercion
+        return
+
+    // CASO B1: No hay espacio y va en el medio
+    si posInsercion < n:
+        si OVER > OMAX:
+            mostrar "Overflow lleno"
+            return
+
+        // insertar en overflow
+        datos[OVER].clave = clave
+        datos[OVER].dato = dato
+        datos[OVER].dir = -1
+
+        // encadenar
+        ultimo = bloqueInicio + (n-1)
+        datos[ultimo].dir = OVER
+
+        OVER++
+
+        return
+
+    // CASO B2: insertar al final
+    si cant >= n/2:
+        si no hay espacio en área primaria:
+            mostrar "Reorganizar archivo"
+            return
+
+        // crear nuevo bloque
+        nuevoBloque = siguiente posición libre en primaria
+
+        insertar ahí
+        actualizar índice
+
+        return
+    
+    //en c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+const int N = 4;        // tamaño de bloque
+const int PMAX = 12;   // fin área primaria 
+const int OMAX = 20;   // tamaño total
+
+struct Registro {
+    int clave = 0;
+    string dato = "";
+    int dir = -1; // puntero overflow
+};
+
+struct Indice {
+    int clave;
+    int dir;
+};
+
+// arreglo principal
+Registro datos[OMAX];
+
+// índice
+vector<Indice> indices;
+
+// puntero a overflow
+int OVER = PMAX + 1;
+
+Registro consultar(int claveBuscada) {
+    int bloqueInicio = -1;
+
+    // buscar bloque en índice
+    for (int i = 0; i < indices.size(); i++) {
+        if (claveBuscada >= indices[i].clave && (i == (int)indices.size() - 1 || claveBuscada < indices[i + 1].clave)) {
+            bloqueInicio = indices[i].dir;
+            break;
+        }
+    }
+
+    if (bloqueInicio == -1) {
+        cout << "No encontrado\n";
+        return {};
+    }
+
+    // recorrer bloque
+    for (int i = 0; i < N; i++) {
+        int pos = bloqueInicio + i;
+
+        if (datos[pos].clave == claveBuscada) {
+            return datos[pos];
+        }
+
+        // recorrer overflow
+        int aux = datos[pos].dir;
+        while (aux != -1) {
+            if (datos[aux].clave == claveBuscada) {
+                return datos[aux];
+            }
+            aux = datos[aux].dir;
+        }
+    }
+
+    cout << "No encontrado\n";
+    return {};
+}
+void insertar(int clave, string dato) {
+    int bloqueInicio = -1;
+    int idx = 0;
+
+    // buscar bloque
+    for (int i = 0; i < indices.size(); i++) {
+        if (i == indices.size() - 1 || clave < indices[i + 1].clave) {
+            bloqueInicio = indices[i].dir;
+            idx = i;
+            break;
+        }
+    }
+
+    // contar elementos
+    int cant = 0;
+    for (int i = 0; i < N; i++) {
+        if (datos[bloqueInicio + i].clave != 0)
+            cant++;
+    }
+
+    // buscar posición
+    int posInsercion = 0;
+    while (posInsercion < N &&
+           datos[bloqueInicio + posInsercion].clave < clave &&
+           datos[bloqueInicio + posInsercion].clave != 0) {
+        posInsercion++;
+    }
+
+    //  CASO A: hay espacio
+    if (cant < N) {
+        for (int i = cant; i > posInsercion; i--) {
+            datos[bloqueInicio + i] = datos[bloqueInicio + i - 1];
+        }
+
+        datos[bloqueInicio + posInsercion] = {clave, dato, -1};
+        return;
+    }
+
+    //  CASO B1: overflow (inserción en medio)
+    if (posInsercion < N) {
+        if (OVER >= OMAX) {
+            cout << "Overflow lleno\n";
+            return;
+        }
+
+        datos[OVER] = {clave, dato, -1};
+
+        int ultimo = bloqueInicio + (N - 1);
+
+        // encadenar
+        int aux = ultimo;
+        while (datos[aux].dir != -1) {
+            aux = datos[aux].dir;
+        }
+
+        datos[aux].dir = OVER;
+        OVER++;
+
+        return;
+    }
+
+    // CASO B2: nuevo bloque
+    if (cant >= N / 2) {
+        if (bloqueInicio + N >= PMAX) {
+            cout << "Reorganizar archivo\n";
+            return;
+        }
+
+        int nuevoBloque = bloqueInicio + N;
+
+        datos[nuevoBloque] = {clave, dato, -1};
+
+        // actualizar índice
+        indices.insert(indices.begin() + idx + 1, {clave, nuevoBloque});
+
+        return;
+    }
+}
+
+//main de prueba
+int main() {
+
+    // inicializar índice con un bloque base
+    indices.push_back({1, 0});
+
+    insertar(1, "A");
+    insertar(3, "B");
+    insertar(5, "C");
+    insertar(7, "D");
+
+    insertar(4, "X"); // va a overflow
+
+    Registro r = consultar(4);
+
+    if (r.clave != 0) {
+        cout << "Encontrado: " << r.clave << " - " << r.dato << endl;
+    }
+
+    return 0;
+}
